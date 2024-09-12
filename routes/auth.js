@@ -2,8 +2,8 @@ import express from "express";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({ title: "index" });
+router.get("/google", (req, res) => {
+  res.json({ title: "Google Login" });
 });
 
 export default router;
