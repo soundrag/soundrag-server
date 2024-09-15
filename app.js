@@ -4,12 +4,12 @@ import createError from "http-errors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import cors from "cors";
 
 import connectDB from "./database/connection.js";
 
 import index from "./routes/index.js";
 import auth from "./routes/auth.js";
-import user from "./routes/user.js";
 
 const app = express();
 
@@ -21,9 +21,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+app.use(
+  cors({
+    origin: process.env.SOUNDRAG_URL,
+    credentials: true,
+  }),
+);
+
 app.use("/", index);
 app.use("/auth", auth);
-app.use("/user", user);
 
 app.use((req, res, next) => {
   next(createError(404));
