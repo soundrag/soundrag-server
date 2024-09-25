@@ -2,7 +2,7 @@ import createError from "http-errors";
 
 import admin from "../firebaseAdmin.js";
 
-import { verifyJWT, generateJWT } from "../utils/jwtUtils.js";
+import Users from "../models/Users.js";
 
 const login = async (req, res, next) => {
   const { idToken } = req.body;
@@ -11,38 +11,37 @@ const login = async (req, res, next) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const { uid, email } = decodedToken;
 
-    const jwtToken = generateJWT({ uid, email });
+    const existingUser = await Users.findOne({ userId: uid });
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-    });
+    const user =
+      existingUser ||
+      (await new Users({ userId: uid, email, positions: [] }).save());
 
-    res.status(200).json({ message: "로그인 성공" });
+    res.status(200).json({ user });
   } catch (error) {
     next(createError(401, "로그인에 실패하였습니다."));
   }
 };
 
 const logout = (req, res) => {
-  res.clearCookie("token");
   res.status(200).json({ message: "로그아웃 성공" });
 };
 
-const verifyToken = (req, res, next) => {
-  const token = req.cookies.token;
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    return res.status(200).json({ message: "로그인이 필요합니다." });
+  if (!authHeader) {
+    return res.status(401).json({ message: "로그인이 필요합니다." });
   }
 
+  const token = authHeader.split(" ")[1];
+
   try {
-    const decoded = verifyJWT(token);
+    const decoded = await admin.auth().verifyIdToken(token);
 
     req.user = decoded;
 
-    return res.status(200).json({ user: decoded });
+    next();
   } catch (error) {
     next(createError(403, "인증에 실패하였습니다."));
   }

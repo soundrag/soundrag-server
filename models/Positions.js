@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const PositionSchema = new Schema({
   userId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: "Users",
   },
 
@@ -28,15 +28,35 @@ const PositionSchema = new Schema({
     default: Date.now,
   },
 
-  speakerPosition: {
-    type: Object,
+  firstSpeakerPosition: {
+    type: Array,
+    required: true,
+  },
+
+  secondSpeakerPosition: {
+    type: Array,
     required: true,
   },
 
   listenerPosition: {
-    type: Object,
+    type: Array,
     required: true,
   },
+});
+
+PositionSchema.post("save", async function (doc) {
+  try {
+    await mongoose.model("Users").findOneAndUpdate(
+      { userId: doc.userId },
+      {
+        $push: {
+          positions: doc._id,
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error updating user positions: ", error);
+  }
 });
 
 const Positions = mongoose.model("Positions", PositionSchema);

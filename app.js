@@ -8,8 +8,9 @@ import cors from "cors";
 
 import connectDB from "./database/connection.js";
 
-import index from "./routes/index.js";
 import auth from "./routes/auth.js";
+import user from "./routes/user.js";
+import studio from "./routes/studio.js";
 
 const app = express();
 
@@ -24,12 +25,14 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: process.env.SOUNDRAG_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   }),
 );
 
-app.use("/", index);
 app.use("/auth", auth);
+app.use("/user", user);
+app.use("/studio", studio);
 
 app.use((req, res, next) => {
   next(createError(404));
