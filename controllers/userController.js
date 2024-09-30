@@ -22,7 +22,6 @@ const saveUserData = async (req, res, next) => {
       userId,
       positionId,
       name,
-      description,
       firstSpeakerPosition,
       secondSpeakerPosition,
       listenerPosition,
@@ -49,7 +48,6 @@ const saveUserData = async (req, res, next) => {
       userId,
       positionId,
       name,
-      description,
       firstSpeakerPosition,
       secondSpeakerPosition,
       listenerPosition,
@@ -67,7 +65,7 @@ const saveUserData = async (req, res, next) => {
 };
 
 const deleteUserData = async (req, res, next) => {
-  const { positionId } = req.body;
+  const { positionId } = req.params;
 
   if (!positionId) {
     return next(createError(400, "positionId가 제공되지 않았습니다."));
